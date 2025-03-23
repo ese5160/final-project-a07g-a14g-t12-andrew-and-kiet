@@ -10,42 +10,101 @@
 
 ## Task List (SAMW25)
 
-* CLI
+* CLI:
+
+  * Priority: 1-2?
+  * Run continuously/when UART received
 * Dog Request Button, User Button
-* LED Fading
-* Wi-Fi/MQTT
-  * Relevant status LEDs
-  * Set RTC for timed task initiations
+
+  * Priority: 4 Medium High
+  * Trigger: GPIO Interrupt
+  * Send the trigger to queue
+  * If valid and not repeated (spam last 30 minutes), start task to Feed and task to send alert to IoT platform
+* LED Fading/Status
+
+  * Priority: 1
+  * Receive message from other tasks via LED queue, maybe can read global var from mutex periodically
+* **Wi-Fi/MQTT**
+
+  * Priority: 5 High
+  * Trigger: Always connected, boot at start and reboot if failed connection; wake up if need to send message or received message
+  * Maintain queues to receive data from IoT or Feeding task, and can send command to IoT, Feeding task, AV.
+  * Access to mutex, peridic update of global variables to send to platform?
 * RTC task?
+
+  * Priority: 3?
+  * Set RTC for timed task initiations
   * Enables/disables tasks based on RTC
 * SHT4 Temp/humidity (ref) reading
-* AV Board Communication (triggered task?)
+
+  * Priority: 1-2
+  * Trigger: periodic
+  * Send via queue/buffer to IoT task
+* **Feed Task**
+
+  * Priority: 5
+  * Trigger: Button press, MQTT task command, periodic trigger (RTC)?
+  * Coordinate all tasks to feed the dog: Motor task -> till index back, digital sensor trips or timeout -> Start light sensor array and ADC read task -> Log events and send to IoT task
 * Motor Task
+
+  * Priority: 4
   * Run food motor until return to index position
   * Run water motor until digital level sensor trips or safety timeout
 * ADC Async Task? - Read water level before and after water bowl
-* Distance Sensor task
-  * Initialize distance sensor
-  * Read distance
-  * Interrupt pin checks
-  * Init AV Board camera trigger, possibly light trigger
-* Accelerometer Task
-  * Init accelerometer
-  * Setup interrupt
-  * If interrupt fires, notify, reset, possibly lock out
-* HDC3022
-  * Temp/humidity food reading
+
+  * Priority: 3
 * Light Sensor Array
+
+  * Priority: 3
   * Get reference light level
   * If too low, turn on lamp to preset brightness
   * Read 8 sensors via mux
   * Calculate food level
   * Report
+
+**IoT Task**
+
+* Priority: 4
+* Triggers: Periodic update ( 30-60 mins), events: tilt, feed, distance
+* Gather messages from Periodic Tasks, Feed Task, AV Task
+* Sends compiled data to Wi-Fi/MQTT Task for upload.
+* Uses queue to collect events, mutex-protected shared data for logs.
+
+**Periodic Sensor Tasks**
+
+* Accelerometer Task
+
+  * Priority: 1
+  * Init accelerometer
+  * Setup interrupt
+  * If interrupt fires, send to IoT task
+* HDC3022
+
+  * Priority: 1
+  * Temp/humidity food reading
+  * Periodic update to IoT task
 * Tamper Switch
+
+  * Priority: 1
+  * Trigger: inerrupt
   * Add owner detect or something (key bypass?)
-  * After refill, re-measure food
+  * After refill, trigger light sensor array task to re-measure food
   * If tamper switch activates otherwise, then send alert.
   * Alternate: Use thumb screws so dog cannot get in, use tamper switch as trigger for re-measure food
+
+* **Distance Sensor task**
+
+  * Priority: 3
+  * Trigger: Command from MQTT, after Feed task?
+  * Initialize distance sensor
+  * Read distance
+  * Interrupt pin checks
+  * Init AV Board camera trigger, possibly light trigger
+* AV Board Communication (triggered task?)
+
+  * Priority: 3
+  * Trigger: Distance sensor task
+  * Send UART trigger to RP board
 
 ## RP2040 Tasks (Round robin?)
 
