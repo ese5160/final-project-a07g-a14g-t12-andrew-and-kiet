@@ -91,7 +91,6 @@
   * After refill, trigger light sensor array task to re-measure food
   * If tamper switch activates otherwise, then send alert.
   * Alternate: Use thumb screws so dog cannot get in, use tamper switch as trigger for re-measure food
-
 * **Distance Sensor task**
 
   * Priority: 3
@@ -174,3 +173,58 @@ Prints available heap size before start, then create the CLI task/thread, and pr
 One thread (CLI) currently.
 
 **
+
+# 3. Debug Logger Module
+
+```c
+/**
+ * @brief Logs a formatted message to the serial console if the message level
+ *        is equal to or above the current log level.
+ *
+ * @param level  The level of the message (e.g., LOG_INFO_LVL, LOG_ERROR_LVL).
+ * @param format A format string.
+ * @param ...    Variable arguments corresponding to the format string.
+ */
+void LogMessage(enum eDebugLogLevels level, const char *format, ...)
+{
+    // Todo: Implement Debug Logger
+	// More detailed descriptions are in header file
+	// Only send if  log_level above current
+ if (level < getLogLevel() || level >= LOG_OFF_LVL)
+ {
+	 return;
+ }
+
+ char messageBuffer[LOG_BUFFER_SIZE];
+ va_list args;
+
+ // Initialize the variable argument list
+ va_start(args, format);
+ // Format the message into Buffer
+ vsnprintf(messageBuffer, LOG_BUFFER_SIZE, format, args);
+ // Clean up the variable argument list
+ va_end(args);
+ // Send message to Serial Console
+ SerialConsoleWriteString(messageBuffer);
+}
+```
+
+Module updated as in code block
+
+Serial Monitor result only prints CLI starting and Error line as expected.
+
+![alt text](A07G_Image/A07G_LoggerModule.jpg)
+
+# 4. Wiretap the convo!
+
+
+1. Logic analyzer attached to the TX line
+2. Correspondingly it is pin PB10 on Board while PB11 is RX
+3. The important setting is: Async Serial Mode (trigger view) with bit rate 115200 (as set in the code), 8 bits per transfer, no parity, 1 stop (8N1 as specified) then convert to ASCII. Below are configuration images (connection + setting) and output result
+   ![alt text](A07G_Image/A07G_AnalyzerConnection.jpg)
+
+   ![alt text](A07G_Image/A07G_LogicAnalyzerSetting.jpg)
+
+   ![alt text](A07G_Image/A07G_LogicAnalyzerResult.jpg)
+
+   Sal file commited at A07GSerial.sal

@@ -34,6 +34,8 @@
 #define RX_BUFFER_SIZE 512 ///< Size of character buffer for RX, in bytes
 #define TX_BUFFER_SIZE 512 ///< Size of character buffers for TX, in bytes
 
+#define LOG_BUFFER_SIZE 128
+
 /******************************************************************************
  * Structures and Enumerations
  ******************************************************************************/
@@ -153,6 +155,25 @@ void LogMessage(enum eDebugLogLevels level, const char *format, ...)
 {
     // Todo: Implement Debug Logger
 	// More detailed descriptions are in header file
+ if (level < getLogLevel() || level >= LOG_OFF_LVL)
+ {
+	 return;
+ }
+
+ char messageBuffer[LOG_BUFFER_SIZE];
+ va_list args;
+
+ // Initialize the variable argument list
+ va_start(args, format);
+
+ // Format the message into messageBuffer
+ vsnprintf(messageBuffer, LOG_BUFFER_SIZE, format, args);
+
+ // Clean up the variable argument list
+ va_end(args);
+
+ // Output the message using the Serial Console
+ SerialConsoleWriteString(messageBuffer);
 }
 
 /*
