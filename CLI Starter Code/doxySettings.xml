@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DoxySettings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <SettingsFile>C:\Git\ESE5160\final-project-a07g-a14g-t12-andrew-and-kiet\CLI Starter Code\doxySettings.xml</SettingsFile>
+  <ProjectName>CLI_StarterCode</ProjectName>
+  <DoxyExePath>C:\Program Files\doxygen\bin\doxygen.exe</DoxyExePath>
+  <UseDefaultSettings>true</UseDefaultSettings>
+  <GenerateAsPartOfBuild>true</GenerateAsPartOfBuild>
+  <ConfigFilePath>C:\Git\ESE5160\final-project-a07g-a14g-t12-andrew-and-kiet\CLI Starter Code\doxyfile</ConfigFilePath>
+  <OutputDirPath>C:\Git\ESE5160\final-project-a07g-a14g-t12-andrew-and-kiet\CLI Starter Code\doxygen</OutputDirPath>
+  <ShowErrorsAndWarnings>false</ShowErrorsAndWarnings>
+</DoxySettings>
