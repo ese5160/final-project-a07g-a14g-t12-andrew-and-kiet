@@ -8,6 +8,53 @@
 
 # 1. **Software Architecture**
 
+## Task List (SAMW25)
+
+* CLI
+* Dog Request Button, User Button
+* LED Fading
+* Wi-Fi/MQTT
+  * Relevant status LEDs
+  * Set RTC for timed task initiations
+* RTC task?
+  * Enables/disables tasks based on RTC
+* SHT4 Temp/humidity (ref) reading
+* AV Board Communication (triggered task?)
+* Motor Task
+  * Run food motor until return to index position
+  * Run water motor until digital level sensor trips or safety timeout
+* ADC Async Task? - Read water level before and after water bowl
+* Distance Sensor task
+  * Initialize distance sensor
+  * Read distance
+  * Interrupt pin checks
+  * Init AV Board camera trigger, possibly light trigger
+* Accelerometer Task
+  * Init accelerometer
+  * Setup interrupt
+  * If interrupt fires, notify, reset, possibly lock out
+* HDC3022
+  * Temp/humidity food reading
+* Light Sensor Array
+  * Get reference light level
+  * If too low, turn on lamp to preset brightness
+  * Read 8 sensors via mux
+  * Calculate food level
+  * Report
+* Tamper Switch
+  * Add owner detect or something (key bypass?)
+  * After refill, re-measure food
+  * If tamper switch activates otherwise, then send alert.
+  * Alternate: Use thumb screws so dog cannot get in, use tamper switch as trigger for re-measure food
+
+## RP2040 Tasks (Round robin?)
+
+* Wait for UART Triggers
+* Get reference light measurement
+* Take snapshot, upload to cloud
+* LED Control
+* Play Audio
+
 #### 1. **Hardware and Software Requirements Specification**
 
 #### 2. Block Diagram
