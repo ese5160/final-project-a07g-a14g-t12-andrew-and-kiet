@@ -236,7 +236,8 @@ Code committed and commented
 
 Code committed and commented
 Video at A07G_Image\A07G_CLI.mp4
-![A07G_CLI_Terminal](https://github.com/user-attachments/assets/ecd23896-536a-4f71-8dd4-befbd56d615e)
+
+or link: https://drive.google.com/file/d/110afQs4N7KxUkq36dOKfQNsCWN813Ipd/view?usp=sharing
 
 <video controls src="A07G_Image/A07G_CLI.mp4" title="Title"></video>
 
