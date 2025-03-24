@@ -33,7 +33,7 @@
  #include <string.h>
  #include <stdarg.h>
  #include "circular_buffer.h"
- 
+ extern SemaphoreHandle_t xRxSemaphore;
  /******************************************************************************
   * Enumerations
   ******************************************************************************/

@@ -12,13 +12,13 @@
 #include "SerialConsole.h"
 #include "FreeRTOS_CLI.h"
 
-
+//extern SemaphoreHandle_t xRxSemaphore;
 #define CLI_TASK_SIZE	256		///<STUDENT FILL
 #define CLI_PRIORITY (configMAX_PRIORITIES - 1) ///<STUDENT FILL
 #define CLI_TASK_DELAY 150	///STUDENT FILL
 
-#define MAX_INPUT_LENGTH_CLI    100	//STUDENT FILL
-#define MAX_OUTPUT_LENGTH_CLI   130	//STUDENT FILL
+#define MAX_INPUT_LENGTH_CLI    130	//STUDENT FILL
+#define MAX_OUTPUT_LENGTH_CLI   130 //STUDENT FILL
 
 #define CLI_MSG_LEN						16
 #define CLI_PC_ESCAPE_CODE_SIZE			4
@@ -48,3 +48,5 @@ BaseType_t CLI_NeotrellProcessButtonBuffer( int8_t *pcWriteBuffer,size_t xWriteB
 BaseType_t CLI_DistanceSensorGetDistance( int8_t *pcWriteBuffer,size_t xWriteBufferLen,const int8_t *pcCommandString );
 BaseType_t CLI_ResetDevice( int8_t *pcWriteBuffer,size_t xWriteBufferLen,const int8_t *pcCommandString );
 BaseType_t CLI_SendDummyGameData( int8_t *pcWriteBuffer,size_t xWriteBufferLen,const int8_t *pcCommandString );
+BaseType_t CLI_GetFirmwareVersion(char *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString);
+BaseType_t CLI_GetTickCount(char *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString);

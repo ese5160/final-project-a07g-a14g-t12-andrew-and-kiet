@@ -10,16 +10,17 @@
  * Includes
  ******************************************************************************/
 #include "CliThread.h"
+#include "SerialConsole.h" 
 
 /******************************************************************************
  * Defines
  ******************************************************************************/
-
 /******************************************************************************
  * Variables
  ******************************************************************************/
 static int8_t *const pcWelcomeMessage =
     "FreeRTOS CLI.\r\nType Help to view a list of registered commands.\r\n";
+#define FIRMWARE_VERSION "0.0.1"
 
 // Clear screen command
 const CLI_Command_Definition_t xClearScreen =
@@ -36,6 +37,23 @@ static const CLI_Command_Definition_t xResetCommand =
         (const pdCOMMAND_LINE_CALLBACK)CLI_ResetDevice,
         0};
 
+static const CLI_Command_Definition_t xVersionCommand =
+{
+    "version",
+    "version: Displays the firmware version.\r\n",
+    CLI_GetFirmwareVersion,
+    0
+};
+
+static const CLI_Command_Definition_t xTicksCommand =
+{
+    "ticks",
+    "ticks: Displays the number of FreeRTOS ticks since startup.\r\n",
+    CLI_GetTickCount,
+    0
+};
+
+
 /******************************************************************************
  * Forward Declarations
  ******************************************************************************/
@@ -43,7 +61,7 @@ static void FreeRTOS_read(char *character);
 /******************************************************************************
  * Callback Functions
  ******************************************************************************/
-
+static void usart_read_callback(struct usart_module *const usart_module);
 /******************************************************************************
  * CLI Thread
  ******************************************************************************/
@@ -54,7 +72,8 @@ void vCommandConsoleTask(void *pvParameters)
 
     FreeRTOS_CLIRegisterCommand(&xClearScreen);
     FreeRTOS_CLIRegisterCommand(&xResetCommand);
-
+	FreeRTOS_CLIRegisterCommand(&xVersionCommand);
+	FreeRTOS_CLIRegisterCommand(&xTicksCommand);
     uint8_t cRxedChar[2], cInputIndex = 0;
     BaseType_t xMoreDataToFollow;
     /* The input and output buffers are declared static to keep them off the stack. */
@@ -208,16 +227,23 @@ void vCommandConsoleTask(void *pvParameters)
 }
 
 /**************************************************************************/ /**
- * @fn			void FreeRTOS_read(char* character)
- * @brief		STUDENTS TO COMPLETE. This function block the thread unless we received a character. How can we do this?
-                 There are multiple solutions! Check all the inter-thread communications available! See https://www.freertos.org/a00113.html
- * @details		STUDENTS TO COMPLETE.
- * @note
- *****************************************************************************/
+/**
+ * @brief Blocks the CLI task until a character is received over UART.
+ *
+ * This function waits on a semaphore that is given by the (ISR) when a character is received. Once the semaphore
+ * is obtained, the function reads a character from the RX circular buffer
+ * and stores it in the  pointer.
+ *
+ *
+ * @param[out] character Pointer to the variable where the received character will be stored.
+ *
+ */
 static void FreeRTOS_read(char *character)
 {
-    // ToDo: Complete this function
-    vTaskSuspend(NULL); // We suspend ourselves. Please remove this when doing your code
+    if (xSemaphoreTake(xRxSemaphore, portMAX_DELAY) == pdTRUE)
+    {
+        SerialConsoleReadCharacter((uint8_t *)character);
+    }
 }
 
 /******************************************************************************
@@ -240,5 +266,35 @@ BaseType_t xCliClearTerminalScreen(char *pcWriteBuffer, size_t xWriteBufferLen, 
 BaseType_t CLI_ResetDevice(int8_t *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString)
 {
     system_reset();
+    return pdFALSE;
+}
+
+/**
+ * @brief CLI command to display firmware version.
+ *
+ * @param pcWriteBuffer Pointer to output buffer.
+ * @param xWriteBufferLen Length of the output buffer.
+ * @param pcCommandString Not used.
+ *
+ * @return pdFALSE to indicate no more output.
+ */
+BaseType_t CLI_GetFirmwareVersion(char *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString)
+{
+    snprintf(pcWriteBuffer, xWriteBufferLen, "Firmware Version: %s\r\n", FIRMWARE_VERSION);
+    return pdFALSE;
+}
+
+/**
+ * @brief CLI command to display number of ticks since scheduler started.
+ *
+ * @param pcWriteBuffer Pointer to output buffer.
+ * @param xWriteBufferLen Length of the output buffer.
+ * @param pcCommandString Not used.
+ *
+ * @return pdFALSE to indicate no more output.
+ */
+BaseType_t CLI_GetTickCount(char *pcWriteBuffer, size_t xWriteBufferLen, const int8_t *pcCommandString)
+{
+    snprintf(pcWriteBuffer, xWriteBufferLen, "Ticks since start: %lu\r\n", xTaskGetTickCount());
     return pdFALSE;
 }

@@ -27,6 +27,7 @@
  * Includes
  ******************************************************************************/
 #include "SerialConsole.h"
+#include "CliThread.h" 
 
 /******************************************************************************
  * Defines
@@ -35,6 +36,7 @@
 #define TX_BUFFER_SIZE 512 ///< Size of character buffers for TX, in bytes
 
 #define LOG_BUFFER_SIZE 128
+SemaphoreHandle_t xRxSemaphore;
 
 /******************************************************************************
  * Structures and Enumerations
@@ -82,10 +84,14 @@ void InitializeSerialConsole(void)
 	configure_usart();
     configure_usart_callbacks();
     NVIC_SetPriority(SERCOM4_IRQn, 10);
+	
+	//Initialize Sephamore
 
     usart_read_buffer_job(&usart_instance, (uint8_t *)&latestRx, 1); // Kicks off constant reading of characters
 
 	// Add any other calls you need to do to initialize your Serial Console
+	xRxSemaphore = xSemaphoreCreateBinary();
+
 }
 
 /**
@@ -149,12 +155,18 @@ void setLogLevel(enum eDebugLogLevels debugLevel)
 }
 
 /**
- * @brief Logs a message at the specified debug level.
+ * @brief Logs a formatted message to the serial console if the message level
+ *        is equal to or above the current log level.
+ *
+ * @param level  The level of the message (e.g., LOG_INFO_LVL, LOG_ERROR_LVL).
+ * @param format A format string.
+ * @param ...    Variable arguments corresponding to the format string.
  */
 void LogMessage(enum eDebugLogLevels level, const char *format, ...)
 {
     // Todo: Implement Debug Logger
 	// More detailed descriptions are in header file
+	// Only send if  log_level above current
  if (level < getLogLevel() || level >= LOG_OFF_LVL)
  {
 	 return;
@@ -165,14 +177,11 @@ void LogMessage(enum eDebugLogLevels level, const char *format, ...)
 
  // Initialize the variable argument list
  va_start(args, format);
-
- // Format the message into messageBuffer
+ // Format the message into Buffer
  vsnprintf(messageBuffer, LOG_BUFFER_SIZE, format, args);
-
  // Clean up the variable argument list
  va_end(args);
-
- // Output the message using the Serial Console
+ // Send message to Serial Console
  SerialConsoleWriteString(messageBuffer);
 }
 
@@ -234,14 +243,33 @@ static void configure_usart_callbacks(void)
 
 /**************************************************************************/ 
 /**
- * @fn			void usart_read_callback(struct usart_module *const usart_module)
- * @brief		Callback called when the system finishes receives all the bytes requested from a UART read job
-		 Students to fill out. Please note that the code here is dummy code. It is only used to show you how some functions work.
- * @note
- *****************************************************************************/
+ * @brief Callback function triggered when a UART read job completes.
+ *
+ * This function is called by the ASF USART driver once a character has been
+ * received via interrupt. It stores the received character into a circular
+ * buffer for later processing by the CLI thread and signals the CLI thread
+ * that data is available by giving a semaphore from the ISR context.
+ *
+ * It also immediately starts a new asynchronous read job to keep receiving
+ * subsequent characters without blocking.
+ *
+ * @param[in] usart_module Pointer to the USART module that triggered the callback.
+ *
+ * @note This function must be registered as the receive callback using
+ *       usart_register_callback() and enabled with usart_enable_callback().
+ *       It should be safe for ISR context and follow FreeRTOS ISR conventions.
+ */
 void usart_read_callback(struct usart_module *const usart_module)
 {
-	// ToDo: Complete this function 
+    circular_buf_put(cbufRx, latestRx);
+
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    xSemaphoreGiveFromISR(xRxSemaphore, &xHigherPriorityTaskWoken);
+
+    // Restart USART read for next byte
+    usart_read_buffer_job(&usart_instance, (uint8_t *)&latestRx, 1);
+
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
 /**************************************************************************/ 

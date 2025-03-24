@@ -217,7 +217,6 @@ Serial Monitor result only prints CLI starting and Error line as expected.
 
 # 4. Wiretap the convo!
 
-
 1. Logic analyzer attached to the TX line
 2. Correspondingly it is pin PB10 on Board while PB11 is RX
 3. The important setting is: Async Serial Mode (trigger view) with bit rate 115200 (as set in the code), 8 bits per transfer, no parity, 1 stop (8N1 as specified) then convert to ASCII. Below are configuration images (connection + setting) and output result
@@ -228,3 +227,17 @@ Serial Monitor result only prints CLI starting and Error line as expected.
    ![alt text](A07G_Image/A07G_LogicAnalyzerResult.jpg)
 
    Sal file commited at A07GSerial.sal
+
+# 5. Complete the CLI
+
+Code committed and commented
+
+# 6. Add CLI commands
+
+Code committed and commented
+Video at A07G_Image\A07G_CLI.mp4
+
+<video controls src="A07G_Image/A07G_CLI.mp4" title="Title"></video>
+
+Screenshot of Terminal:
+![alt text](A07G_Image/A07G_CLI_Terminal.jpg)
