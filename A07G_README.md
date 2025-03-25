@@ -152,121 +152,103 @@ Additional features:
 
 # Software Requirement Specification
 
-**SRS-01: Device Initialization**
+*If not  otherwise stated, each SRS shall be prefixed with "The System/Task Shall*  
+**If diagram and wording disagree, diagram takes precidence**  
+
+#### SRS-01: Device Initialization
 
 * Upon power-up, initializes all sensor and actuator tasks.
 * Establishes secure Wi-Fi connection within 60 seconds using the Wi-Fi Task.
 
-1. **Monitoring & Status Detection**
+#### Monitoring & Status Detection
 
-**SRS-02: Dog Presence Detection**
+##### SRS-02: Dog Presence Detection
 
-**Distance Sensor Task**
-
+* The distance sensor shall be activated as necessary by the relavant tasks. It shall operate with an interrupt.
+* The distance sensor may be polled (if necessary by another task), or an additional task may be written to poll it if necessary
 * Monitors distance to detect dog presence within 20 cm.
 * Sends presence status to the IoT Reporting Task.
-* Triggers Camera Task if dog is detected and control signal from MQTT task is received.
+* Triggers Camera Task if dog is detected, via passing message to feeding task
 
-**SRS-03:
-Food Level Monitoring**
+##### SRS-03: Food Level Monitoring
 
-* The system shall compare light sensors or IR sensors meaurements to determine the  food presence at five sensor positions
-  corresponding to levels (20%, 40%, 60%, 80%, and 100%) .
-* The system shall update the queue to IoT task with the food level every hour.
+* The system shall compare light sensors meaurements to determine the  food presence at five sensor positions corresponding to levels (20%, 40%, 60%, 80%, and 100%).
+* If neccissary, the system shall enable the lights via the AV board for an accurate reading
+* The system shall update the queue to IoT task with the food level every hour (or at a rate perscribed by the designers).
 * If the food level falls below  20%, the system shall send an alert to the IoT task.
 * LED3 (Red) shall turn ON when the food level is below  20% .
 
-**SRS-04:
-Water Level Monitoring**
+##### SRS-04: Water Level Monitoring**
 
-* Reads tank volume using analog sensor via ADC Task.
-* Sends hourly status to IoT Task.
-* If tank level < 20%, triggers LED4 (Red) and sends alert to IoT task.
+* The system shall read tank volume using analog sensor via ADC Task.
+* The system shall send status to IoT Task.
+* If tank level < 20%, triggers LED3 (Red) and sends alert to IoT task.
+* If Bowl level is low, the system shall trigger the necessary task to refill it.
 
-**SRS-05:
-Tilt Detection & Device Stability**
+##### SRS-05: Tilt Detection & Device Stability
 
-* Triggers alert interrupt and notifies IoT Task when exceeding threshold.
+* The systemn shall trigger an alert via interrupt and notify IoT Task when exceeding threshold.
 
-**SRS-06:
-Temperature & Humidity**
+##### SRS-06: Temperature & Humidity
 
-* Periodically monitor temperature and humidity and update to IoT task queue
+* The system shall periodically monitor temperature and humidity and update to IoT task queue
+* The system shall monitor food condition and external enviornment condition
 
-2. **Dispensing & User Interaction**
+#### Dispensing & User Interaction
 
-**SRS-07:
-Feed Task**
+##### SRS-07: Feed Task
 
-* Coordinates food dispensing.
-* Receives commands from MQTT or RTC Task.
-* Sends start command to both Food and Water Motor Task.
-* Waits for motor rotation completion via switch feedback/digital water sensor.
+* The task shall coordinate food dispensing.
+* The task shall receive commands from MQTT or RTC Task.
+* The task shall wait for motor rotation completion via switch feedback, with NMI
 * Sends start command to food/water monitoring task
-* Enforces a 5-minute cooldown between activations.
 
-**SRS-08:
-Pump**
+##### SRS-08: Pump
 
-* Activates pump motor to fill water bowl.
-* Stops pump based on float sensor input or timeout.
+* The system shall activate pump motor to fill water bowl.
+* The system Shall Stop pump based on float sensor input or timeout.
 
-**SRS-09:
-Motor**
+##### SRS-09: Motor
 
 * Rotates feeder motor one full turn upon command.
 * Uses limit/magnetic switch to detect full rotation.
-* Sends completion signal to Feed Task.
+* Use an NMI for safety
 
-**SRS-10:
-RTC task**
+##### SRS-10: RTC task interrupt
 
 * Manages scheduled events (sensors, monitoring, IoT).
 * Triggers tasks using FreeRTOS notifications.
-* Maintains ±60 sec accuracy for schedule execution.
+* Maintains ±5-60 sec accuracy for schedule execution.
 
-**SRS-11:
-LED**
+##### SRS-11: LED
 
-* Controls status LEDs (Green, Blue, Red).
-* Controls LED inside hooper
+* Controls status LEDs (Green, Red).
 * Responds to commands from other tasks (IoT/Food Monitoring).
 
-**SRS-11:
-Dog Request Button for Communication**
+##### SRS-11:Dog Request Button for Communication
 
 * Handles input from dog or user button.
 * Debounces and limits presses to 1 per 20 minutes.
 * Sends alerts to IoT Reporting Task.
 
-**SRS-12:
-Camera Monitoring & Pet Image Capture**
+##### SRS-12: Camera Monitoring & Pet Image Capture
 
 * Commands a secondary MCU to capture pet image.
 * Triggered by Distance Sensor Task or MQTT command.
 * Sends image to platform.
 
-**SRS-13:
-Camera Monitoring & Pet Image Capture**
-
-* Commands a secondary MCU to capture pet image.
-* Triggered by Distance Sensor Task or MQTT command.
-* Sends image to platform.
-
-**SRS-14:
-Audio**
+##### SRS-14: Audio**
 
 * Plays pre-recorded clips to call dog during scheduled or command-driven events.
 * Triggered by Feed or IoT Task.
 
-**SRS-14:
-Tamper Switch**
+##### SRS-15: Tamper Switch
 
 * Detects hopper lid removal via.
 * Sends alert to IoT Task.
 * Triggers re-measurement of food level via Light Sensor Task.
 
-4. **Communication & Data Handling**
+#### Communication & Data Handling
 
 **SRS-15:
 MQTT**
