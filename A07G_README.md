@@ -32,7 +32,7 @@
   * Access to mutex, peridic update of global variables to send to platform?
 * RTC task?
 
-  * Priority: 3?
+  * Priority: 4
   * Set RTC for timed task initiations
   * Enables/disables tasks based on RTC
 * SHT4 Temp/humidity (ref) reading
@@ -114,6 +114,191 @@
 * Play Audio
 
 #### 1. **Hardware and Software Requirements Specification**
+
+# Hardware Requirement Specification
+
+Microcontroller Unit (MCU)
+
+* HRS 01 - The SAMD21 microcontroller shall be the primary processing unit. The Wi-Fi WINC1500 network controller shall be used for IoT connectivity.
+* HRS 02 - The SAMD21 and WINC1500 shall be used in the combined ATSAMW25 module
+
+Sensors
+
+* HRS 03 - An analog water level sensor shall be used to monitor the height of water in the tank with an accuracy of ±5%.
+* HRS 04 – A float level sensor (digital) shall be used to detect the presence or absence of water in the pet’s drinking bowl.
+* HRS 05 -  A distance sensor shall be used to detect the presence of the pet. The sensor shall measure distance with a range of 1 meter and accuracy of ±10%
+* HRS 06 - An array of up to 8 light sensors shall be used to monitor food levels at incremental levels. Each sensor shall measure values that can differentiate if food is covering it or not.
+* HRS 07 - An I2C mux/switch shall be used to sample all light sensors output.
+* HRS 08 - An LED driver shall be utilized to operate the LED in the hopper. The LED shall have enough brightness for easy differentiation of light sensor values.
+* HRS 09 - An ADC mux shall be used to sample all reflective sensors output.
+* HRS 10 - An accelerometer shall be used to detect any significant tipping or tilting of the device.
+* HRS 11 - A position switch (magnetic sensor or switch) shall be used to accurately check for one full rotation of the motor.
+* HRS 12 - A tamper switch (magnetic sensor or switch) shall be used to check for lid opening events.
+  Actuators:
+* HRS 13 - One motor shall be used to perform a rotation of the dispensing mechanism. The motor shall have enough torque to move the mechanism
+* HRS 14 - One Peristaltic Liquid Pump shall be used to pump the water from the tank to the dog food while guaranteeing food safety.
+* HRS 15 - One motor driver shall be used to control the direction and torque for the motor and pump
+* HRS 16 - Status LEDs shall be used to turn on/off showing different device status.
+
+Power:
+
+* HRS 17 - The system shall draw power from one power jack with power regulation for the MCU, power rails for motor/pumps, and peripherals and option to use USB-PD to power. One simple switch shall be used to turn on the system.
+
+Additional features:
+
+* HRS 18 - A dog request button shall be used for the dog (trained) to press on to request food. The button shall have a diameter of 100mm to make it easy to press
+* HRS 19 - A camera module shall take a picture of the dog, controlled by RP2040.
+* HRS 20 - An audio module including RP2040, amplifier, speaker shall be used to play the recorded audio such as calling the dog.
+
+# Software Requirement Specification
+
+**SRS-01: Device Initialization**
+
+* Upon power-up, initializes all sensor and actuator tasks.
+* Establishes secure Wi-Fi connection within 60 seconds using the Wi-Fi Task.
+
+1. **Monitoring & Status Detection**
+
+**SRS-02: Dog Presence Detection**
+
+**Distance Sensor Task**
+
+* Monitors distance to detect dog presence within 20 cm.
+* Sends presence status to the IoT Reporting Task.
+* Triggers Camera Task if dog is detected and control signal from MQTT task is received.
+
+**SRS-03:
+Food Level Monitoring**
+
+* The system shall compare light sensors or IR sensors meaurements to determine the  food presence at five sensor positions
+  corresponding to levels (20%, 40%, 60%, 80%, and 100%) .
+* The system shall update the queue to IoT task with the food level every hour.
+* If the food level falls below  20%, the system shall send an alert to the IoT task.
+* LED3 (Red) shall turn ON when the food level is below  20% .
+
+**SRS-04:
+Water Level Monitoring**
+
+* Reads tank volume using analog sensor via ADC Task.
+* Sends hourly status to IoT Task.
+* If tank level < 20%, triggers LED4 (Red) and sends alert to IoT task.
+
+**SRS-05:
+Tilt Detection & Device Stability**
+
+* Triggers alert interrupt and notifies IoT Task when exceeding threshold.
+
+**SRS-06:
+Temperature & Humidity** 
+
+* Periodically monitor temperature and humidity and update to IoT task queue
+
+2. **Dispensing & User Interaction**
+
+**SRS-07:
+Feed Task**
+
+* Coordinates food dispensing.
+* Receives commands from MQTT or RTC Task.
+* Sends start command to both Food and Water Motor Task.
+* Waits for motor rotation completion via switch feedback/digital water sensor.
+* Sends start command to food/water monitoring task
+* Enforces a 5-minute cooldown between activations.
+
+**SRS-08:
+Pump**
+
+* Activates pump motor to fill water bowl.
+* Stops pump based on float sensor input or timeout.
+
+**SRS-09:
+Motor**
+
+* Rotates feeder motor one full turn upon command.
+* Uses limit/magnetic switch to detect full rotation.
+* Sends completion signal to Feed Task.
+
+**SRS-10:
+RTC task**
+
+* Manages scheduled events (feed/water/audio).
+* Triggers tasks using FreeRTOS notifications.
+* Maintains ±60 sec accuracy for schedule execution.
+
+**SRS-11:
+LED**
+
+* Controls status LEDs (Green, Blue, Red).
+* Controls LED inside hooper
+* Responds to commands from other tasks (IoT/Food Monitoring).
+
+**SRS-11:
+Dog Request Button for Communication**
+
+* Handles input from dog or user button.
+* Debounces and limits presses to 1 per 20 minutes.
+* Sends alerts to IoT Reporting Task.
+
+**SRS-12:
+Camera Monitoring & Pet Image Capture**
+
+* Commands a secondary MCU to capture pet image.
+* Triggered by Distance Sensor Task or MQTT command.
+* Sends image to platform.
+
+**SRS-13:
+Camera Monitoring & Pet Image Capture**
+
+* Commands a secondary MCU to capture pet image.
+* Triggered by Distance Sensor Task or MQTT command.
+* Sends image to platform.
+
+**SRS-14:
+Audio**
+
+* Plays pre-recorded clips to call dog during scheduled or command-driven events.
+* Triggered by Feed or IoT Task.
+
+**SRS-14:
+Tamper Switch**
+
+* Detects hopper lid removal via.
+* Sends alert to IoT Task.
+* Triggers re-measurement of food level via Light Sensor Task.
+
+4. **Communication & Data Handling**
+
+**SRS-15:
+MQTT**
+
+* Connects to the IoT platform using WINC1500.
+* Manages subscriptions and publishes via MQTT/HTTP.
+* Reconnects automatically if disconnected.
+
+**SRS-16:
+IoT**
+
+* Collects and logs system data from all monitoring and control tasks.
+* Sends updates every 20 minutes or when an event occurs.
+* Logs data including food/water events, dog presence, tilt, and battery.
+* Sends notifications to platform.
+* Receive command from platform and activate tasks correpondingly
+
+**SRS-15:
+Data Logging & Storage**
+
+* The platform shall  log events , including:
+
+  * Feeding times
+  * Water refills
+  * Dog presence detection
+  * Device tilt alerts
+
+**SRS-16:
+Security & Data Encryption**
+
+* The system shall implement secure authentication mechanisms for accessing the IoT platform.
+* All data transmissions shall be encrypted using AES or DES to prevent unauthorized access.
 
 #### 2. Block Diagram
 
