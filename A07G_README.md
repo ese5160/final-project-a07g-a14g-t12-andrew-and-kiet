@@ -6,9 +6,11 @@
 * GitHub Repository URL: https://github.com/ese5160/final-project-a07g-a14g-t12-andrew-and-kiet
 * Description of test hardware: (development boards, sensors, actuators, laptop + OS, etc)
 
-# 1. **Software Architecture**
+## 1. Software Architecture
 
-## Task List (SAMW25)
+### Task List (SAMW25)
+
+**THIS IS A DRAFT THAT BECAME THE SOFTWARE DIAGRAM. The diagram takes precidence. This is kept for documentation purposes only.**  
 
 * CLI:
 
@@ -113,16 +115,14 @@
 * LED Control
 * Play Audio
 
-#### 1. **Hardware and Software Requirements Specification**
+### 1. Hardware and Software Requirements Specification
 
-# Hardware Requirement Specification
-
-Microcontroller Unit (MCU)
+#### Microcontroller Unit (MCU)
 
 * HRS 01 - The SAMD21 microcontroller shall be the primary processing unit. The Wi-Fi WINC1500 network controller shall be used for IoT connectivity.
 * HRS 02 - The SAMD21 and WINC1500 shall be used in the combined ATSAMW25 module
 
-Sensors
+#### Sensors
 
 * HRS 03 - An analog water level sensor shall be used to monitor the height of water in the tank with an accuracy of ±5%.
 * HRS 04 – A float level sensor (digital) shall be used to detect the presence or absence of water in the pet’s drinking bowl.
@@ -140,17 +140,17 @@ Sensors
 * HRS 15 - One motor driver shall be used to control the direction and torque for the motor and pump
 * HRS 16 - An RTC module shall be used to trigger peridiodic tasks
 
-Power:
+#### Power:
 
 * HRS 17 - The system shall draw power from one power jack with power regulation for the MCU, power rails for motor/pumps, and peripherals and option to use USB-PD to power. One simple switch shall be used to turn on the system.
 
-Additional features:
+#### Additional features:
 
 * HRS 18 - A dog request button shall be used for the dog (trained) to press on to request food. The button shall have a diameter of 100mm to make it easy to press
 * HRS 19 - A camera module shall take a picture of the dog, controlled by RP2040.
 * HRS 20 - An audio module including RP2040, amplifier, speaker shall be used to play the recorded audio such as calling the dog.
 
-# Software Requirement Specification
+### Software Requirement Specification
 
 *If not  otherwise stated, each SRS shall be prefixed with "The System/Task Shall*  
 **If diagram and wording disagree, diagram takes precidence**  
@@ -178,7 +178,7 @@ Additional features:
 * If the food level falls below  20%, the system shall send an alert to the IoT task.
 * LED3 (Red) shall turn ON when the food level is below  20% .
 
-##### SRS-04: Water Level Monitoring**
+##### SRS-04: Water Level Monitoring
 
 * The system shall read tank volume using analog sensor via ADC Task.
 * The system shall send status to IoT Task.
@@ -237,7 +237,7 @@ Additional features:
 * Triggered by Distance Sensor Task or MQTT command.
 * Sends image to platform.
 
-##### SRS-14: Audio**
+##### SRS-14: Audio
 
 * Plays pre-recorded clips to call dog during scheduled or command-driven events.
 * Triggered by Feed or IoT Task.
@@ -250,15 +250,13 @@ Additional features:
 
 #### Communication & Data Handling
 
-**SRS-15:
-MQTT**
+##### SRS-15: MQTT
 
 * Connects to the IoT platform using WINC1500.
 * Manages subscriptions and publishes via MQTT/HTTP.
 * Reconnects automatically if disconnected.
 
-**SRS-16:
-IoT**
+##### SRS-16: IoT
 
 * Collects and logs system data from all monitoring and control tasks.
 * Sends updates every 20 minutes or when an event occurs.
@@ -266,8 +264,7 @@ IoT**
 * Sends notifications to platform.
 * Receive command from platform and activate tasks correpondingly
 
-**SRS-15:
-Data Logging & Storage**
+##### SRS-15: Data Logging & Storage
 
 * The platform shall  log events , including:
 
@@ -275,20 +272,40 @@ Data Logging & Storage**
   * Water refills
   * Dog presence detection
   * Device tilt alerts
+* Events shall at a minimum be logged to console, but may be logged to the SD card via a dedicated task that may be created in the future
 
-**SRS-16:
-Security & Data Encryption**
+##### SRS-16: Security & Data Encryption
 
 * The system shall implement secure authentication mechanisms for accessing the IoT platform.
 * All data transmissions shall be encrypted using AES or DES to prevent unauthorized access.
 
-#### 2. Block Diagram
+### 2. Block Diagram
+
+**Due to a breakdown in communication, two different block diagrams were created, which unfortunately have some differences.**
+
+#### Andrew's Diagram
+
+**Task Description block diagram (better implementation but possibly worse drawing, does not show task interaction as it is assumed priorities will pre-emt tasks, and data will be exchanged as stated in text):**   
+![alt text](<A07G_Image/Software Block Diagram.svg>)  
+[Direct PDF Link](https://raw.githubusercontent.com/ese5160/final-project-a07g-a14g-t12-andrew-and-kiet/main/Software%20Block%20Diagram.pdf)
+
+The above diagram makes the following assumptions:
+
+* We will start with 100 Priority Levels
+* Additional details about tasks and actions can be provided in the future, but several are dependant on things related to the HAL and custom drivers, and exact implementations on what is a task vs what is a function, and how passing things to IOT/MQTT works
+* Initilization tasks are NOT described.
+
+#### Kiet's diagram
+
+This is an alternate version of the software block diagram, it complements the more detailed task based diagram near the beginning of this document. It assumes fewer priority levels, and does not properly take into account all interrupts, but does have more explicit information about what data goes where.
+
+**Detailed Tasks in Software Block Diagram**
 
 ![alt text](A07G_Image/A07G_tasks.drawio.png)
 
-Detailed Tasks in Software Block Diagram
-
 ### 3. Flowchart
+
+**Important Note:** When Andrew was drawing his diagram in the previous section, he included the information that is in the flow charts directly inside it, under each task. Kiet independantly drew these flow charts, and due to a communication issue, they don't 100% match. We apologize. Please consider both versions when grading.
 
 ![alt text](A07G_Image/IoT_Task.jpg)
 
@@ -306,9 +323,9 @@ Detailed Tasks in Software Block Diagram
 
 ![alt text](A07G_Image/Sensor_Task.jpg)
 
-# 2. **Understanding the Starter Code**
+## 2. Understanding the Starter Code
 
-**Answer the following questions:
+**Answer the following questions:**
 
 1. What does “InitializeSerialConsole()” do? In said function, what is “cbufRx” and “cbufTx”? What type of data structure is it?
    InitializeSerialConsole():
@@ -361,7 +378,7 @@ One thread (CLI) currently.
 
 **
 
-# 3. Debug Logger Module
+## 3. Debug Logger Module
 
 ```c
 /**
@@ -402,7 +419,7 @@ Serial Monitor result only prints CLI starting and Error line as expected.
 
 ![alt text](A07G_Image/A07G_LoggerModule.jpg)
 
-# 4. Wiretap the convo!
+## 4. Wiretap the convo!
 
 1. Logic analyzer attached to the TX line
 2. Correspondingly it is pin PB10 on Board while PB11 is RX
@@ -415,11 +432,11 @@ Serial Monitor result only prints CLI starting and Error line as expected.
 
    Sal file commited at A07GSerial.sal
 
-# 5. Complete the CLI
+## 5. Complete the CLI
 
 Code committed and commented
 
-# 6. Add CLI commands
+## 6. Add CLI commands
 
 Code committed and commented
 Video at A07G_Image\A07G_CLI.mp4
