@@ -18,7 +18,8 @@
 
 ### Software Block Diagram
 
-![Software Task Diagram](A07G_Image/Software%20Block%20Diagram.svg)
+![Software Task Diagram](A07G_Image/Software%20Block%20Diagram.svg)  
+[Direct PDF Link](https://raw.githubusercontent.com/ese5160/final-project-a07g-a14g-t12-andrew-and-kiet/main/Software%20Block%20Diagram.pdf)
 
 <!-- ## Draft Task List (SAMW25)
 
@@ -125,9 +126,7 @@
 * Take snapshot, upload to cloud
 * Play Audio (will ignore any feeding audio if got command to take picture before command for audio), must disable light if light is active, but must "request permission" from SAMW25
 
-## 1. **Hardware and Software Requirements Specification**
-
-# Hardware Requirement Specification
+### Hardware Requirement Specification
 
 Microcontroller Unit (MCU)
 
@@ -154,17 +153,18 @@ Sensors
 
 Power:
 
-* HRS 17 - The system shall draw power from one power jack with power regulation for the MCU, power rails for motor/pumps, and peripherals and option to use USB-PD to power. One simple switch shall be used to turn on the system.
+* HRS 17 - The system shall draw power from one power jack with power regulation for the MCU, power rails for motor/pumps, and peripherals. Bare necessities shall be powered by USB-C.
 
 Additional features:
 
-* HRS 18 - A dog request button shall be used for the dog (trained) to press on to request food. The button shall have a diameter of 100mm to make it easy to press
+* HRS 18 - A dog request button shall be used for the dog (trained) to press on to request food or attention. The button shall have a diameter of 100mm to make it easy to press
 * HRS 19 - A camera module shall take a picture of the dog, controlled by RP2040.
 * HRS 20 - An audio module including RP2040, amplifier, speaker shall be used to play the recorded audio such as calling the dog.
+* HRS 21 - Supplemental lighting shall be availible and controlled by the RP2040.
 
-# Software Requirement Specification
+### Software Requirement Specification
 
-**SRS-01: Device Initialization**
+#### SRS-01: Device Initialization
 
 * Upon power-up, initializes all sensor and actuator tasks.
 * Establishes secure Wi-Fi connection within 60 seconds using the Wi-Fi Task.
