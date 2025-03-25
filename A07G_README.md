@@ -309,12 +309,19 @@ Detailed Tasks in Software Block Diagram
 ### 3. Flowchart
 
 ![alt text](A07G_Image/IoT_Task.jpg)
+
 ![alt text](A07G_Image/MQTT_Task.jpg)
+
 ![alt text](A07G_Image/Button_Task.jpg)
+
 ![alt text](A07G_Image/Feed_Task.jpg)
+
 ![alt text](A07G_Image/LED_Task.jpg)
+
 ![alt text](A07G_Image/RP2040_Task.jpg)
-![alt text](A07G_Image/RTC_Task (2).jpg)
+
+![alt text](A07G_Image/RTC_Task.jpg)
+
 ![alt text](A07G_Image/Sensor_Task.jpg)
 
 # 2. **Understanding the Starter Code**
