@@ -6,9 +6,21 @@
 * GitHub Repository URL: https://github.com/ese5160/final-project-a07g-a14g-t12-andrew-and-kiet
 * Description of test hardware: (development boards, sensors, actuators, laptop + OS, etc)
 
-# 1. **Software Architecture**
+[Assignment Document](https://docs.google.com/document/d/1RvCNJQjvDzG2FcKN4NYomTISlL6nRGJ_kcqNtSz5Pr8/edit?tab=t.0)
 
-## Task List (SAMW25)
+## 1. Software Architecture
+
+### Notes
+
+* We will start with 100 Priority Levels
+* Additional details about tasks and actions can be provided in the future, but several are dependant on things related to the HAL and custom drivers, and exact implementations on what is a task vs what is a function, and how passing things to IOT/MQTT works
+* Initilization tasks are NOT described.
+
+### Software Block Diagram
+
+![Software Task Diagram](A07G_Image/Software%20Block%20Diagram.svg)
+
+<!-- ## Draft Task List (SAMW25)
 
 * CLI:
 
@@ -103,17 +115,17 @@
 
   * Priority: 3
   * Trigger: Distance sensor task
-  * Send UART trigger to RP board
+  * Send UART trigger to RP board -->
 
-## RP2040 Tasks (Round robin?)
+### RP2040 Tasks (Round robin?)
 
 * Wait for UART Triggers
 * Get reference light measurement
-* Take snapshot, upload to cloud
 * LED Control
-* Play Audio
+* Take snapshot, upload to cloud
+* Play Audio (will ignore any feeding audio if got command to take picture before command for audio), must disable light if light is active, but must "request permission" from SAMW25
 
-#### 1. **Hardware and Software Requirements Specification**
+## 1. **Hardware and Software Requirements Specification**
 
 # Hardware Requirement Specification
 
